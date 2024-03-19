@@ -1,95 +1,89 @@
-import { NextPage } from "next";
+import { useContext, FormEvent, useState } from "react";
+
 import Head from "next/head";
-import { useMemo, useState } from "react";
-import { createTodo, deleteTodo, toggleTodo, useTodos } from "../api";
-import styles from "../styles/Home.module.css";
-import { Todo } from "../types";
+import Image from "next/image";
+import styles from "../styles/home.module.scss";
+import { canSSRGuest } from "../utils/canSSRGuest";
+import { GetServerSideProps } from "next";
 
-export const TodoList: React.FC = () => {
-  const { data: todos, error } = useTodos();
+import logoImg from "../../public/logoou.png";
 
-  if (error != null) return <div>Error loading todos...</div>;
-  if (todos == null) return <div>Loading...</div>;
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { toast } from "react-toastify";
 
-  if (todos.length === 0) {
-    return <div className={styles.emptyState}>Try adding a todo ☝️️</div>;
+import { AuthContext } from "../contexts/AuthContext";
+
+import Link from "next/link";
+
+export default function Home() {
+  const { signIn } = useContext(AuthContext);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(event: FormEvent) {
+    event.preventDefault();
+
+    if (email === "" || password === "") {
+      toast.error("PREENCHA TODOS OS CAMPOS");
+      return;
+    }
+
+    setLoading(true);
+
+    let data = {
+      email,
+      password,
+    };
+
+    await signIn(data);
+
+    setLoading(false);
   }
 
   return (
-    <ul className={styles.todoList}>
-      {todos.map(todo => (
-        <TodoItem todo={todo} />
-      ))}
-    </ul>
-  );
-};
-
-const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => (
-  <li className={styles.todo}>
-    <label
-      className={`${styles.label} ${todo.completed ? styles.checked : ""}`}
-    >
-      <input
-        type="checkbox"
-        checked={todo.completed}
-        className={`${styles.checkbox}`}
-        onChange={() => toggleTodo(todo)}
-      />
-      {todo.text}
-    </label>
-
-    <button className={styles.deleteButton} onClick={() => deleteTodo(todo.id)}>
-      ✕
-    </button>
-  </li>
-);
-
-const AddTodoInput = () => {
-  const [text, setText] = useState("");
-
-  return (
-    <form
-      onSubmit={async e => {
-        e.preventDefault();
-        createTodo(text);
-        setText("");
-      }}
-      className={styles.addTodo}
-    >
-      <input
-        className={styles.input}
-        placeholder="Buy some milk"
-        value={text}
-        onChange={e => setText(e.target.value)}
-      />
-      <button className={styles.addButton}>Add</button>
-    </form>
-  );
-};
-
-const Home: NextPage = () => {
-  return (
-    <div className={styles.container}>
+    <>
       <Head>
-        <title>Railway NextJS Prisma</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>AcaiLegal - Faça seu login</title>
       </Head>
+      <div className={styles.containerCenter}>
+        <Image src={logoImg} alt="Logo Sujeito Pizzaria" />
 
-      <header className={styles.header}>
-        <h1 className={styles.title}>Todos</h1>
-        <h2 className={styles.desc}>
-          NextJS app connected to Postgres using Prisma and hosted on{" "}
-          <a href="https://railway.app">Railway</a>
-        </h2>
-      </header>
+        <div className={styles.login}>
+          <form onSubmit={handleLogin}>
+            <Input
+              placeholder="Digite seu email"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-      <main className={styles.main}>
-        <AddTodoInput />
+            <Input
+              placeholder="Sua senha"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-        <TodoList />
-      </main>
-    </div>
+            <Button type="submit" loading={loading}>
+              Acessar
+            </Button>
+          </form>
+
+          <Link href="/signup">
+            <p className={styles.text}>Nao possui uma conta? Cadastre-se</p>
+          </Link>
+        </div>
+      </div>
+    </>
   );
-};
+}
 
-export default Home;
+export const getServerSideProps = canSSRGuest(async (ctx) => {
+  return {
+    props: {},
+  };
+});
