@@ -1,52 +1,53 @@
 import Head from "next/head";
 import { Header } from "../../components/Header";
 import { FormEvent, useState } from "react";
-import styles from "./styles.module.scss";
 import { setupAPIClient } from "../../services/api";
 import { toast } from "react-toastify";
+import styles from "./styles.module.scss";
+import Link from "next/link";
+import { FaPlus } from "react-icons/fa6";
 import { canSSRAuth } from "../../utils/canSSRAuth";
 
-export default function Category() {
-  const [name, setName] = useState("");
+type ItemProps = {
+  id: string;
+  name: string;
+};
 
-  async function handleRegister(event: FormEvent) {
-    event.preventDefault();
-    if (!name) return;
+interface CategoryProps {
+  categories: ItemProps[];
+}
 
-    const apiClient = setupAPIClient();
-
-    await apiClient.post("/categories", { name: name });
-
-    toast.success("Categoria cadastrada com sucesso!");
-
-    setName("");
-  }
+export default function add({ categories }: CategoryProps) {
   return (
     <>
       <Head>
-        <title>Nova Categoria - AcaiLegal</title>
+        <title>Painel - AcaiLegal</title>
       </Head>
       <div>
         <Header />
-
         <main className={styles.container}>
-          <h1>Nova categoria</h1>
+          <div className={styles.header}>
+            <h1>Categorias</h1>
+            <Link href="/category/add">
+              <button>
+                <FaPlus color="#3fffa3" />
+              </button>
+            </Link>
+          </div>
 
-          <form className={styles.form} onSubmit={handleRegister}>
-            <input
-              type="text"
-              placeholder="Nome da Categoria"
-              className={styles.input}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-            />
-
-            <button className={styles.button} type="submit">
-              Cadastrar
-            </button>
-          </form>
+          <article className={styles.listOrders}>
+            {categories.length === 0 && (
+              <span className={styles.emptyList}>
+                Nenhuma categoria cadastrada.
+              </span>
+            )}
+            {categories.map((item) => (
+              <section key={item.id} className={styles.orderItem}>
+                <div className={styles.tag}></div>
+                <span>Categoria: {item.name} </span>
+              </section>
+            ))}
+          </article>
         </main>
       </div>
     </>
@@ -54,7 +55,13 @@ export default function Category() {
 }
 
 export const getServerSideProps = canSSRAuth(async (ctx) => {
+  const api = setupAPIClient(ctx);
+
+  const response = await api.get("/categories");
+
   return {
-    props: {},
+    props: {
+      categories: response.data || [],
+    },
   };
 });

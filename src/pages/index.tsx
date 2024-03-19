@@ -50,19 +50,19 @@ export default function Home() {
         <title>AcaiLegal - Faça seu login</title>
       </Head>
       <div className={styles.containerCenter}>
-        <Image src={logoImg} alt="Logo Sujeito Pizzaria" />
+        <Image src={logoImg} alt="Logo AcaiLegal" />
 
         <div className={styles.login}>
           <form onSubmit={handleLogin}>
             <Input
-              placeholder="Digite seu email"
+              placeholder="E-mail"
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
 
             <Input
-              placeholder="Sua senha"
+              placeholder="Senha"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

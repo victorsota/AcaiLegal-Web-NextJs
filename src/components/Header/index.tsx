@@ -22,7 +22,7 @@ export function Header() {
 
         <nav className={styles.headerMenu}>
           <Link href="/category">
-            <p>Nova categoria</p>
+            <p>Categoria</p>
           </Link>
 
           <Link href="/product">

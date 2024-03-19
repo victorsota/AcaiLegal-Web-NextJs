@@ -98,29 +98,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  useEffect(() => {
-    const cookies = parseCookies();
-    const token = cookies["@pizza.token"];
-
-    if (token) {
-      api
-        .get("/users/me")
-        .then((response) => {
-          const { id, name, email } = response.data;
-
-          setUser({
-            id,
-            name,
-            email,
-          });
-        })
-
-        .catch((err) => {
-          signOut(); // se deu erro, deslogar o usuário
-        });
-    }
-  }, []);
-
   return (
     <AuthContext.Provider
       value={{ user, isAuthenticated, signIn, signOut, signUp }}
